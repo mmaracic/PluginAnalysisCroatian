@@ -6,6 +6,8 @@
 package org.elasticsearch.indices.analysis;
 
 import org.elasticsearch.common.inject.AbstractModule;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.index.analysis.AnalysisModule;
 
 /**
  *
@@ -13,6 +15,10 @@ import org.elasticsearch.common.inject.AbstractModule;
  */
 public class CroatianAnalysisModule extends AbstractModule {
 
+//    public CroatianAnalysisModule(Settings settings, IndicesAnalysisService indicesAnalysisService){
+//        super(settings, indicesAnalysisService);
+//    }
+    
     @Override
     protected void configure() {
         bind(CroatianIndicesAnalysis.class).asEagerSingleton();

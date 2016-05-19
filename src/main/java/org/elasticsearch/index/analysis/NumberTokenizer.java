@@ -6,8 +6,10 @@
 package org.elasticsearch.index.analysis;
 
 import java.io.IOException;
-import java.nio.CharBuffer;
 import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
+import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 
 /**
  *
@@ -17,14 +19,73 @@ public class NumberTokenizer  extends Tokenizer{
 
     protected static final int BUFFERMAX = 1024;
     protected final char buffer[] = new char[BUFFERMAX];
+    protected final char outputBuffer[] = new char[BUFFERMAX];
     /** true length of text in the buffer */
     private int length = 0; 
-    /** accumulated offset of previous buffers for this reader, for offsetAtt */
+    /** offset of not-yet-used text in the buffer - first such character*/
     protected int offset = 0;
+    /** end of not-yet-used text in the buffer - place after last such character*/
+    protected int textEnd = 0;
+    
+    protected int outputEnd = 0;
 
+    private final OffsetAttribute offsetAtt = addAttribute(OffsetAttribute.class);
+    private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
+    private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
+  
     @Override
-    public boolean incrementToken() throws IOException {
-        input.r
+    public final boolean incrementToken() throws IOException
+    {   
+        boolean readAll = false;
+        while(!readAll)
+        {
+            length = (offset<=textEnd)?textEnd-offset:BUFFERMAX-(textEnd-offset);
+            while(length<BUFFERMAX){
+                int count = 0;
+                if (textEnd == BUFFERMAX && offset>0) textEnd = 0;
+                if (offset<=textEnd){
+                    count = input.read(buffer, textEnd, BUFFERMAX-textEnd);
+                } else if (offset>textEnd){
+                    count = input.read(buffer, textEnd, offset-textEnd);
+                }
+                if (count == -1){
+                    readAll = true;
+                    break;
+                }
+                textEnd+=count;
+                length = (offset<textEnd)?textEnd-offset:BUFFERMAX-(textEnd-offset);
+            }
+
+            outputEnd=0;
+            char c = buffer[offset];
+            boolean digit = false;
+            while(length>0){            
+                if ((c>='0' && c<='9') || c=='.' || c==',')
+                {
+                    outputBuffer[outputEnd] = c;
+                    outputEnd++;
+                    digit = true;
+                } else {
+                    if (digit)
+                    {
+                        offset++;
+                        length--;
+                        break;
+                    }
+                }
+                offset++;
+                length--;
+                if (offset==BUFFERMAX)
+                    offset=0;
+                c = buffer[offset];
+            }
+
+            if (outputEnd>0){
+                termAtt.copyBuffer(outputBuffer, 0, outputEnd);
+                offsetAtt.setOffset(0, outputEnd-1);
+                return true;
+            }
+        }
         return false;
     }
     

@@ -11,7 +11,9 @@ import org.apache.lucene.analysis.Tokenizer;
 import org.elasticsearch.common.component.AbstractComponent;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.index.analysis.BackFrontTokenizer;
 import org.elasticsearch.index.analysis.CharFilterFactory;
+import org.elasticsearch.index.analysis.NumberTokenizer;
 import org.elasticsearch.index.analysis.PreBuiltCharFilterFactoryFactory;
 import org.elasticsearch.index.analysis.PreBuiltTokenFilterFactoryFactory;
 import org.elasticsearch.index.analysis.PreBuiltTokenizerFactoryFactory;
@@ -28,78 +30,92 @@ public class CroatianIndicesAnalysis extends AbstractComponent {
     @Inject
     public CroatianIndicesAnalysis(Settings settings, IndicesAnalysisService indicesAnalysisService) {
         super(settings);
+        int takeBack = settings.getAsInt("index.analysis.tokenizer.takeBack", 0);
+        int takeFront = settings.getAsInt("index.analysis.tokenizer.takeFront", 0);
 
-        indicesAnalysisService.tokenizerFactories().put("icu_tokenizer", new PreBuiltTokenizerFactoryFactory(new TokenizerFactory() {
+        indicesAnalysisService.tokenizerFactories().put("croatian_number_tokenizer", new PreBuiltTokenizerFactoryFactory(new TokenizerFactory() {
             @Override
             public String name() {
-                return "icu_tokenizer";
+                return "croatian_number_tokenizer";
             }
 
             @Override
             public Tokenizer create() {
-                return new ICUTokenizer();
+                return new NumberTokenizer();
             }
         }));
 
-        indicesAnalysisService.tokenFilterFactories().put("icu_normalizer", new PreBuiltTokenFilterFactoryFactory(new TokenFilterFactory() {
+        indicesAnalysisService.tokenizerFactories().put("croatian_backfront_tokenizer", new PreBuiltTokenizerFactoryFactory(new TokenizerFactory() {
             @Override
             public String name() {
-                return "icu_normalizer";
+                return "croatian_backfront_tokenizer";
             }
 
             @Override
-            public TokenStream create(TokenStream tokenStream) {
-                return new org.apache.lucene.analysis.icu.ICUNormalizer2Filter(tokenStream, Normalizer2.getInstance(null, "nfkc_cf", Normalizer2.Mode.COMPOSE));
+            public Tokenizer create() {
+                return new BackFrontTokenizer(takeBack, takeFront);
             }
         }));
 
-
-        indicesAnalysisService.tokenFilterFactories().put("icu_folding", new PreBuiltTokenFilterFactoryFactory(new TokenFilterFactory() {
-            @Override
-            public String name() {
-                return "icu_folding";
-            }
-
-            @Override
-            public TokenStream create(TokenStream tokenStream) {
-                return new ICUFoldingFilter(tokenStream);
-            }
-        }));
-
-        indicesAnalysisService.tokenFilterFactories().put("icu_collation", new PreBuiltTokenFilterFactoryFactory(new TokenFilterFactory() {
-            @Override
-            public String name() {
-                return "icu_collation";
-            }
-
-            @Override
-            public TokenStream create(TokenStream tokenStream) {
-                return new ICUCollationKeyFilter(tokenStream, Collator.getInstance());
-            }
-        }));
-
-        indicesAnalysisService.tokenFilterFactories().put("icu_transform", new PreBuiltTokenFilterFactoryFactory(new TokenFilterFactory() {
-            @Override
-            public String name() {
-                return "icu_transform";
-            }
-
-            @Override
-            public TokenStream create(TokenStream tokenStream) {
-                return new ICUTransformFilter(tokenStream, Transliterator.getInstance("Null", Transliterator.FORWARD));
-            }
-        }));
-        
-        indicesAnalysisService.charFilterFactories().put("icu_normalizer", new PreBuiltCharFilterFactoryFactory(new CharFilterFactory() {
-            @Override
-            public String name() {
-                return "icu_normalizer";
-            }
-
-            @Override
-            public Reader create(Reader reader) {
-                return new ICUNormalizer2CharFilter(reader);
-            }
-        }));
+//        indicesAnalysisService.tokenFilterFactories().put("icu_normalizer", new PreBuiltTokenFilterFactoryFactory(new TokenFilterFactory() {
+//            @Override
+//            public String name() {
+//                return "icu_normalizer";
+//            }
+//
+//            @Override
+//            public TokenStream create(TokenStream tokenStream) {
+//                return new org.apache.lucene.analysis.icu.ICUNormalizer2Filter(tokenStream, Normalizer2.getInstance(null, "nfkc_cf", Normalizer2.Mode.COMPOSE));
+//            }
+//        }));
+//
+//
+//        indicesAnalysisService.tokenFilterFactories().put("icu_folding", new PreBuiltTokenFilterFactoryFactory(new TokenFilterFactory() {
+//            @Override
+//            public String name() {
+//                return "icu_folding";
+//            }
+//
+//            @Override
+//            public TokenStream create(TokenStream tokenStream) {
+//                return new ICUFoldingFilter(tokenStream);
+//            }
+//        }));
+//
+//        indicesAnalysisService.tokenFilterFactories().put("icu_collation", new PreBuiltTokenFilterFactoryFactory(new TokenFilterFactory() {
+//            @Override
+//            public String name() {
+//                return "icu_collation";
+//            }
+//
+//            @Override
+//            public TokenStream create(TokenStream tokenStream) {
+//                return new ICUCollationKeyFilter(tokenStream, Collator.getInstance());
+//            }
+//        }));
+//
+//        indicesAnalysisService.tokenFilterFactories().put("icu_transform", new PreBuiltTokenFilterFactoryFactory(new TokenFilterFactory() {
+//            @Override
+//            public String name() {
+//                return "icu_transform";
+//            }
+//
+//            @Override
+//            public TokenStream create(TokenStream tokenStream) {
+//                return new ICUTransformFilter(tokenStream, Transliterator.getInstance("Null", Transliterator.FORWARD));
+//            }
+//        }));
+//        
+//        indicesAnalysisService.charFilterFactories().put("icu_normalizer", new PreBuiltCharFilterFactoryFactory(new CharFilterFactory() {
+//            @Override
+//            public String name() {
+//                return "icu_normalizer";
+//            }
+//
+//            @Override
+//            public Reader create(Reader reader) {
+//                return new ICUNormalizer2CharFilter(reader);
+//            }
+//        }));
     }
 }
