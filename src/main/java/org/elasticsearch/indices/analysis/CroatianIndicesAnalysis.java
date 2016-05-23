@@ -30,8 +30,10 @@ public class CroatianIndicesAnalysis extends AbstractComponent {
     @Inject
     public CroatianIndicesAnalysis(Settings settings, IndicesAnalysisService indicesAnalysisService) {
         super(settings);
-        int takeBack = settings.getAsInt("index.analysis.tokenizer.takeBack", 0);
-        int takeFront = settings.getAsInt("index.analysis.tokenizer.takeFront", 0);
+        int takeBack = settings.getAsInt("tokenizer.FrontBackTokenizer.takeBack", 0);
+        int takeFront = settings.getAsInt("tokenizer.FrontBackTokenizer.takeFront", 0);
+        System.out.println("Analysis takeBack: "+takeBack+" takeFront: "+takeFront);
+        System.out.println("Analysis Settings: "+settings.toDelimitedString('#'));
 
         indicesAnalysisService.tokenizerFactories().put("croatian_number_tokenizer", new PreBuiltTokenizerFactoryFactory(new TokenizerFactory() {
             @Override
@@ -53,7 +55,8 @@ public class CroatianIndicesAnalysis extends AbstractComponent {
 
             @Override
             public Tokenizer create() {
-                return new BackFrontTokenizer(takeBack, takeFront);
+                System.out.println("Tokenizer created by analysis");
+                return new BackFrontTokenizer(1, 3);
             }
         }));
 
