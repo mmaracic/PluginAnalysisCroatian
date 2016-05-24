@@ -7,6 +7,7 @@ package org.elasticsearch.index.analysis;
 
 import java.io.IOException;
 import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
@@ -83,6 +84,7 @@ public class NumberTokenizer  extends Tokenizer{
             if (outputEnd>0){
                 termAtt.copyBuffer(outputBuffer, 0, outputEnd);
                 offsetAtt.setOffset(0, outputEnd-1);
+                typeAtt.setType(StandardTokenizer.TOKEN_TYPES[StandardTokenizer.NUM]);
                 return true;
             }
         }
