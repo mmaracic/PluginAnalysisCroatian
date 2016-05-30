@@ -43,7 +43,7 @@ public class BackFrontTokenizer extends Tokenizer{
         super();
         this.takeBack = takeBack;
         this.takeFront = takeFront;
-        System.out.println("Tokenizer takeBack: "+takeBack+" takeFront: "+takeFront);
+        //System.out.println("Tokenizer takeBack: "+takeBack+" takeFront: "+takeFront);
     }
   
     @Override
@@ -56,7 +56,7 @@ public class BackFrontTokenizer extends Tokenizer{
             outputCounter++;
             
             termAtt.copyBuffer(outputBuffer, tempTakeBack, outputEnd-tempTakeFront-tempTakeBack);
-            System.out.println(termAtt.toString());
+            //System.out.println(termAtt.toString());
             offsetAtt.setOffset(tempTakeBack, outputEnd-tempTakeFront-1);
             positionAtt.setPositionIncrement(1);
             return true;
@@ -109,7 +109,7 @@ public class BackFrontTokenizer extends Tokenizer{
 
                 if (outputEnd>0){
                     termAtt.copyBuffer(outputBuffer, 0, outputEnd);
-                    System.out.println(termAtt.toString());
+                    //System.out.println(termAtt.toString());
                     offsetAtt.setOffset(0, outputEnd-1);
                     positionAtt.setPositionIncrement(1);
                     return true;

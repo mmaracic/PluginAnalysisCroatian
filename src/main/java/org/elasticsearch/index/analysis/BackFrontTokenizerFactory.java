@@ -26,13 +26,13 @@ public class BackFrontTokenizerFactory extends AbstractTokenizerFactory{
         super(index, indexSettingsService.getSettings(), name, settings);
         takeBack = settings.getAsInt("takeBack", 0);
         takeFront = settings.getAsInt("takeFront", 0);
-        System.out.println("Factory takeBack: "+takeBack+" takeFront: "+takeFront);
-        System.out.println("Factory Settings: "+settings.toDelimitedString('#'));
+//        System.out.println("Factory takeBack: "+takeBack+" takeFront: "+takeFront);
+//        System.out.println("Factory Settings: "+settings.toDelimitedString('#'));
     }
 
     @Override
     public Tokenizer create() {
-        System.out.println("Tokenizer created by factory");
+//        System.out.println("Tokenizer created by factory");
         return new BackFrontTokenizer(takeBack, takeFront);
     }        
 }
