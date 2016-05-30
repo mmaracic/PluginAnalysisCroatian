@@ -10,6 +10,7 @@ import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
+import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 
 /**
@@ -33,6 +34,7 @@ public class NumberTokenizer  extends Tokenizer{
     private final OffsetAttribute offsetAtt = addAttribute(OffsetAttribute.class);
     private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
     private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
+    private final PositionIncrementAttribute positionAtt = addAttribute(PositionIncrementAttribute.class);
   
     @Override
     public final boolean incrementToken() throws IOException
@@ -85,6 +87,7 @@ public class NumberTokenizer  extends Tokenizer{
                 termAtt.copyBuffer(outputBuffer, 0, outputEnd);
                 offsetAtt.setOffset(0, outputEnd-1);
                 typeAtt.setType(StandardTokenizer.TOKEN_TYPES[StandardTokenizer.NUM]);
+                positionAtt.setPositionIncrement(1);
                 return true;
             }
         }

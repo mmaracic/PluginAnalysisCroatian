@@ -9,6 +9,7 @@ import java.io.IOException;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
+import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 
 /**
@@ -33,6 +34,7 @@ public class BackFrontTokenizer extends Tokenizer{
     private final OffsetAttribute offsetAtt = addAttribute(OffsetAttribute.class);
     private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
     private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
+    private final PositionIncrementAttribute positionAtt = addAttribute(PositionIncrementAttribute.class);
     
     protected int takeBack=0;
     protected int takeFront=0;
@@ -56,6 +58,7 @@ public class BackFrontTokenizer extends Tokenizer{
             termAtt.copyBuffer(outputBuffer, tempTakeBack, outputEnd-tempTakeFront-tempTakeBack);
             System.out.println(termAtt.toString());
             offsetAtt.setOffset(tempTakeBack, outputEnd-tempTakeFront-1);
+            positionAtt.setPositionIncrement(1);
             return true;
         } else {
             while(!readAll)
@@ -108,6 +111,7 @@ public class BackFrontTokenizer extends Tokenizer{
                     termAtt.copyBuffer(outputBuffer, 0, outputEnd);
                     System.out.println(termAtt.toString());
                     offsetAtt.setOffset(0, outputEnd-1);
+                    positionAtt.setPositionIncrement(1);
                     return true;
                 }
             }

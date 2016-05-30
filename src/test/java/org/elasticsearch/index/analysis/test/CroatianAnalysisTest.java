@@ -13,6 +13,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
+import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
+import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.elasticsearch.Version;
 import org.elasticsearch.cluster.metadata.IndexMetaData;
 import org.elasticsearch.common.inject.Injector;
@@ -105,14 +108,18 @@ public class CroatianAnalysisTest {
         return injector.getInstance(IndicesAnalysisService.class);
     }
     
-    //@Test
-    public void testTokenizer2()
+    @Test
+    public void testNumberTokenizer()
     {
         try {
             Tokenizer tokenizer = new NumberTokenizer();
-            tokenizer.setReader(new StringReader("this is 1996 a sentence 2004"));
+            //tokenizer.setReader(new StringReader("this is 1996 a sentence 2004"));
+            tokenizer.setReader(new StringReader("1996"));
             CharTermAttribute term1 = tokenizer.addAttribute(CharTermAttribute.class);
-            
+            TypeAttribute typeAtt = tokenizer.addAttribute(TypeAttribute.class);
+            OffsetAttribute offsetAtt = tokenizer.addAttribute(OffsetAttribute.class);
+            PositionIncrementAttribute positionAtt = tokenizer.addAttribute(PositionIncrementAttribute.class);
+                    
             tokenizer.reset();
             while(tokenizer.incrementToken())
             {
@@ -126,13 +133,15 @@ public class CroatianAnalysisTest {
         }
     }
     
-    @Test
+    //@Test
     public void testFrontBackTokenizer()
     {
         try {
             Tokenizer tokenizer = new BackFrontTokenizer(1,3);
             tokenizer.setReader(new StringReader("this is 1996 a sentence 2004"));
             CharTermAttribute term1 = tokenizer.addAttribute(CharTermAttribute.class);
+            TypeAttribute typeAtt = tokenizer.addAttribute(TypeAttribute.class);
+            OffsetAttribute offsetAtt = tokenizer.addAttribute(OffsetAttribute.class);
             
             tokenizer.reset();
             while(tokenizer.incrementToken())
