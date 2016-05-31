@@ -148,7 +148,6 @@ public class CroatianAnalysisTest {
             while(tokenizer.incrementToken())
             {
                 String result = term1.toString();
-                System.out.println(result);
             }
             tokenizer.end();
             tokenizer.close();
