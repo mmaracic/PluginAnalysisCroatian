@@ -5,19 +5,14 @@
  */
 package org.elasticsearch.indices.analysis;
 
-import java.io.Reader;
-import org.apache.lucene.analysis.TokenStream;
+import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Tokenizer;
 import org.elasticsearch.common.component.AbstractComponent;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.index.analysis.BackFrontTokenizer;
-import org.elasticsearch.index.analysis.CharFilterFactory;
 import org.elasticsearch.index.analysis.NumberTokenizer;
-import org.elasticsearch.index.analysis.PreBuiltCharFilterFactoryFactory;
-import org.elasticsearch.index.analysis.PreBuiltTokenFilterFactoryFactory;
 import org.elasticsearch.index.analysis.PreBuiltTokenizerFactoryFactory;
-import org.elasticsearch.index.analysis.TokenFilterFactory;
 import org.elasticsearch.index.analysis.TokenizerFactory;
 
 /**
@@ -26,14 +21,16 @@ import org.elasticsearch.index.analysis.TokenizerFactory;
  * @author Marijo
  */
 public class CroatianIndicesAnalysis extends AbstractComponent {
+    
+    private static Logger log = Logger.getLogger(CroatianIndicesAnalysis.class);
 
     @Inject
     public CroatianIndicesAnalysis(Settings settings, IndicesAnalysisService indicesAnalysisService) {
         super(settings);
         int takeBack = settings.getAsInt("tokenizer.FrontBackTokenizer.takeBack", 0);
         int takeFront = settings.getAsInt("tokenizer.FrontBackTokenizer.takeFront", 0);
-        System.out.println("Analysis takeBack: "+takeBack+" takeFront: "+takeFront);
-        System.out.println("Analysis Settings: "+settings.toDelimitedString('#'));
+//        log.info("Analysis takeBack: "+takeBack+" takeFront: "+takeFront);
+//        log.info("Analysis Settings: "+settings.toDelimitedString('#'));
 
         indicesAnalysisService.tokenizerFactories().put("croatian_number_tokenizer", new PreBuiltTokenizerFactoryFactory(new TokenizerFactory() {
             @Override
@@ -55,7 +52,7 @@ public class CroatianIndicesAnalysis extends AbstractComponent {
 
             @Override
             public Tokenizer create() {
-                System.out.println("Tokenizer created by analysis");
+//                log.info("Tokenizer created by analysis");
                 return new BackFrontTokenizer(1, 3);
             }
         }));
