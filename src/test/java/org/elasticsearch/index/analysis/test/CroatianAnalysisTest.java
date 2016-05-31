@@ -108,7 +108,7 @@ public class CroatianAnalysisTest {
         return injector.getInstance(IndicesAnalysisService.class);
     }
     
-    @Test
+    //@Test
     public void testNumberTokenizer()
     {
         try {
@@ -133,12 +133,13 @@ public class CroatianAnalysisTest {
         }
     }
     
-    //@Test
+    @Test
     public void testFrontBackTokenizer()
     {
         try {
             Tokenizer tokenizer = new BackFrontTokenizer(1,3);
-            tokenizer.setReader(new StringReader("this is 1996 a sentence 2004"));
+            //tokenizer.setReader(new StringReader("this is 1996 a sentence 2004"));
+            tokenizer.setReader(new StringReader("Primorsko-goranska županija.. This is a test"));
             CharTermAttribute term1 = tokenizer.addAttribute(CharTermAttribute.class);
             TypeAttribute typeAtt = tokenizer.addAttribute(TypeAttribute.class);
             OffsetAttribute offsetAtt = tokenizer.addAttribute(OffsetAttribute.class);

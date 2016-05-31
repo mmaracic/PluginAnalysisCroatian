@@ -63,7 +63,7 @@ public class NumberTokenizer  extends Tokenizer{
             char c = buffer[offset];
             boolean digit = false;
             while(length>0){            
-                if ((c>='0' && c<='9') || c=='.' || c==',')
+                if (Character.isDigit(c) || c=='.' || c==',')
                 {
                     outputBuffer[outputEnd] = c;
                     outputEnd++;

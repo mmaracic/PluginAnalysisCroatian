@@ -85,7 +85,7 @@ public class BackFrontTokenizer extends Tokenizer{
                 char c = buffer[offset];
                 boolean digit = false;
                 while(length>0){            
-                    if ((c>='a' && c<='z') || (c>='A' && c<='Z'))
+                    if (Character.isLetter(c))
                     {
                         //part of token
                         outputBuffer[outputEnd] = c;
