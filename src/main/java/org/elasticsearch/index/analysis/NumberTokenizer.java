@@ -29,7 +29,10 @@ public class NumberTokenizer  extends Tokenizer{
     /** end of not-yet-used text in the buffer - place after last such character*/
     protected int textEnd = 0;
     
+    Character lastC = null;
+    
     protected int outputEnd = 0;
+    protected boolean digit = false;
 
     private final OffsetAttribute offsetAtt = addAttribute(OffsetAttribute.class);
     private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
@@ -40,12 +43,12 @@ public class NumberTokenizer  extends Tokenizer{
     public final boolean incrementToken() throws IOException
     {   
         boolean readAll = false;
+        boolean endToken = false;
         while(!readAll)
         {
-            length = (offset<=textEnd)?textEnd-offset:BUFFERMAX-(textEnd-offset);
+            length = (offset<=textEnd)?textEnd-offset:BUFFERMAX-(offset-textEnd);
             while(length<BUFFERMAX){
                 int count = 0;
-                if (textEnd == BUFFERMAX && offset>0) textEnd = 0;
                 if (offset<=textEnd){
                     count = input.read(buffer, textEnd, BUFFERMAX-textEnd);
                 } else if (offset>textEnd){
@@ -56,14 +59,18 @@ public class NumberTokenizer  extends Tokenizer{
                     break;
                 }
                 textEnd+=count;
-                length = (offset<textEnd)?textEnd-offset:BUFFERMAX-(textEnd-offset);
+                if (textEnd == BUFFERMAX) textEnd = 0;
+                length = (offset<textEnd)?textEnd-offset:BUFFERMAX-(offset-textEnd);
             }
 
-            outputEnd=0;
             char c = buffer[offset];
-            boolean digit = false;
-            while(length>0){            
-                if (Character.isDigit(c) || c=='.' || c==',')
+            while(length>0){
+                offset++;
+                length--;
+                if (offset==BUFFERMAX)
+                    offset=0;
+                if (Character.isDigit(c) || (c=='.' && digit && ((lastC != null && Character.isDigit(lastC)) || lastC == null))
+                        || (c==',' && digit && ((lastC != null && Character.isDigit(lastC)) || lastC == null)))
                 {
                     outputBuffer[outputEnd] = c;
                     outputEnd++;
@@ -71,27 +78,33 @@ public class NumberTokenizer  extends Tokenizer{
                 } else {
                     if (digit)
                     {
-                        offset++;
-                        length--;
+                        endToken = true;
                         break;
                     }
                 }
-                offset++;
-                length--;
-                if (offset==BUFFERMAX)
-                    offset=0;
+                lastC = c;
                 c = buffer[offset];
             }
-
-            if (outputEnd>0){
-                termAtt.copyBuffer(outputBuffer, 0, outputEnd);
-                offsetAtt.setOffset(0, outputEnd-1);
-                typeAtt.setType(StandardTokenizer.TOKEN_TYPES[StandardTokenizer.NUM]);
-                positionAtt.setPositionIncrement(1);
-                return true;
+            if (endToken) break;
+            if (readAll){
+                return false;
             }
         }
-        return false;
+        if (outputEnd>0){
+            if (outputBuffer[outputEnd-1] == '.' || outputBuffer[outputEnd-1] == ','){
+                outputEnd--;
+            }
+            termAtt.copyBuffer(outputBuffer, 0, outputEnd);
+            offsetAtt.setOffset(0, outputEnd-1);
+            typeAtt.setType(StandardTokenizer.TOKEN_TYPES[StandardTokenizer.NUM]);
+            positionAtt.setPositionIncrement(1);
+            outputEnd=0;
+            digit = false;
+            lastC = null;
+            return true;
+        } else {
+            return false;
+        }
     }
     
 }

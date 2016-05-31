@@ -113,8 +113,8 @@ public class CroatianAnalysisTest {
     {
         try {
             Tokenizer tokenizer = new NumberTokenizer();
-            //tokenizer.setReader(new StringReader("this is 1996 a sentence 2004"));
-            tokenizer.setReader(new StringReader("1996"));
+            tokenizer.setReader(new StringReader("this is 1996 a sentence 2004..  In a year 1998 i had 15 years."));
+            //tokenizer.setReader(new StringReader("1996"));
             CharTermAttribute term1 = tokenizer.addAttribute(CharTermAttribute.class);
             TypeAttribute typeAtt = tokenizer.addAttribute(TypeAttribute.class);
             OffsetAttribute offsetAtt = tokenizer.addAttribute(OffsetAttribute.class);
@@ -139,7 +139,7 @@ public class CroatianAnalysisTest {
         try {
             Tokenizer tokenizer = new BackFrontTokenizer(1,3);
             //tokenizer.setReader(new StringReader("this is 1996 a sentence 2004"));
-            tokenizer.setReader(new StringReader("Primorsko-goranska županija.. This is a test"));
+            tokenizer.setReader(new StringReader("Primorsko-goranska županija.. This is a test. It is 1996 a sentence 2004..  In a year 1998 i had 15 years."));
             CharTermAttribute term1 = tokenizer.addAttribute(CharTermAttribute.class);
             TypeAttribute typeAtt = tokenizer.addAttribute(TypeAttribute.class);
             OffsetAttribute offsetAtt = tokenizer.addAttribute(OffsetAttribute.class);

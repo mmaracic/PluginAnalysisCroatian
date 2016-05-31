@@ -66,10 +66,9 @@ public class BackFrontTokenizer extends Tokenizer{
         } else {
             while(!readAll)
             {
-                length = (offset<=textEnd)?textEnd-offset:BUFFERMAX-(textEnd-offset);
+                length = (offset<=textEnd)?textEnd-offset:BUFFERMAX-(offset-textEnd);
                 while(length<BUFFERMAX){
                     int count = 0;
-                    if (textEnd == BUFFERMAX && offset>0) textEnd = 0;
                     if (offset<=textEnd){
                         count = input.read(buffer, textEnd, BUFFERMAX-textEnd);
                     } else if (offset>textEnd){
@@ -80,7 +79,8 @@ public class BackFrontTokenizer extends Tokenizer{
                         break;
                     }
                     textEnd+=count;
-                    length = (offset<textEnd)?textEnd-offset:BUFFERMAX-(textEnd-offset);
+                    if (textEnd == BUFFERMAX) textEnd = 0;
+                    length = (offset<textEnd)?textEnd-offset:BUFFERMAX-(offset-textEnd);
                 }
 
                 outputEnd=0;
