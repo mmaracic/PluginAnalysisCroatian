@@ -22,8 +22,9 @@ public class BackFrontTokenizer extends Tokenizer{
     private static Logger log = Logger.getLogger(BackFrontTokenizer.class);
 
     protected static final int BUFFERMAX = 1024;
+    protected static final int OUTPUTMAX = 512;
     protected final char buffer[] = new char[BUFFERMAX];
-    protected final char outputBuffer[] = new char[BUFFERMAX];
+    protected final char outputBuffer[] = new char[OUTPUTMAX];
     /** true length of text in the buffer */
     private int length = 0; 
     /** offset of not-yet-used text in the buffer - first such character*/
@@ -32,7 +33,9 @@ public class BackFrontTokenizer extends Tokenizer{
     protected int textEnd = 0;
     
     protected int outputEnd = 0;
+    protected int outputSize = 0;
     protected int outputCounter = 0;
+    boolean nonWs = false;
 
     private final OffsetAttribute offsetAtt = addAttribute(OffsetAttribute.class);
     private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
@@ -46,89 +49,86 @@ public class BackFrontTokenizer extends Tokenizer{
         super();
         this.takeBack = takeBack;
         this.takeFront = takeFront;
-        log.info("Tokenizer takeBack: "+takeBack+" takeFront: "+takeFront);
+        //log.info("Tokenizer takeBack: "+takeBack+" takeFront: "+takeFront);
     }
   
     @Override
     public final boolean incrementToken() throws IOException
     {   
-        try{
-            boolean readAll = false;
-            if (outputEnd>(takeBack+takeFront) && outputCounter < ((takeBack+1)*(takeFront+1))){
-                int tempTakeFront = outputCounter%(takeFront+1);
-                int tempTakeBack = (int) (((float)outputCounter)/(takeFront+1));
-                outputCounter++;
+        boolean readAll = false;
+        boolean endToken = false;
+        if (outputSize>(takeBack+takeFront) && outputCounter >0 && outputCounter < ((takeBack+1)*(takeFront+1))){
+            int tempTakeFront = outputCounter%(takeFront+1);
+            int tempTakeBack = (int) (((float)outputCounter)/(takeFront+1));
+            outputCounter++;
 
-                termAtt.copyBuffer(outputBuffer, tempTakeBack, outputEnd-tempTakeFront-tempTakeBack);
-                log.info(termAtt.toString());
-                offsetAtt.setOffset(tempTakeBack, outputEnd-tempTakeFront-1);
-                positionAtt.setPositionIncrement(1);
-                return true;
-            } else {
-                while(!readAll)
-                {
-                    length = (offset<=textEnd)?textEnd-offset:BUFFERMAX-(offset-textEnd);
-                    while(length<BUFFERMAX){
-                        int count = 0;
-                        if (offset<=textEnd){
-                            count = input.read(buffer, textEnd, BUFFERMAX-textEnd);
-                        } else if (offset>textEnd){
-                            count = input.read(buffer, textEnd, offset-textEnd);
-                        }
-                        if (count == -1){
-                            readAll = true;
+            termAtt.copyBuffer(outputBuffer, tempTakeBack, outputSize-tempTakeFront-tempTakeBack);
+            //log.info(termAtt.toString());
+            offsetAtt.setOffset(tempTakeBack, outputSize-tempTakeFront-1);
+            positionAtt.setPositionIncrement(1);
+            return true;
+        } else {
+            while(!readAll)
+            {
+                length = (offset<=textEnd)?textEnd-offset:BUFFERMAX-(offset-textEnd);
+                while(length<BUFFERMAX){
+                    int count = 0;
+                    if (offset<=textEnd){
+                        count = input.read(buffer, textEnd, BUFFERMAX-textEnd);
+                    } else if (offset>textEnd){
+                        count = input.read(buffer, textEnd, offset-textEnd);
+                    }
+                    if (count == -1){
+                        readAll = true;
+                        break;
+                    }
+                    textEnd+=count;
+                    if (textEnd == BUFFERMAX) textEnd = 0;
+                    length = (offset<textEnd)?textEnd-offset:BUFFERMAX-(offset-textEnd);
+                }
+
+                char c = buffer[offset];
+                while(length>0){            
+                    offset++;
+                    length--;
+                    if (offset==BUFFERMAX)
+                        offset=0;
+                    if (!Character.isWhitespace(c))
+                    {
+                        //part of token
+                        outputBuffer[outputEnd] = c;
+                        outputEnd++;
+                        nonWs = true;
+                    } else {
+                        //outside token
+                        if (nonWs)
+                        {
+                            endToken = true;                                
                             break;
                         }
-                        textEnd+=count;
-                        if (textEnd == BUFFERMAX) textEnd = 0;
-                        length = (offset<textEnd)?textEnd-offset:BUFFERMAX-(offset-textEnd);
                     }
-
-                    outputEnd=0;
+                    c = buffer[offset];
+                }
+                if (endToken || (readAll && nonWs)){
                     outputCounter=1;
-                    char c = buffer[offset];
-                    boolean digit = false;
-                    while(length>0){            
-                        if (Character.isLetter(c))
-                        {
-                            //part of token
-                            outputBuffer[outputEnd] = c;
-                            outputEnd++;
-                            digit = true;
-                        } else {
-                            //outside token
-                            if (digit)
-                            {
-                                offset++;
-                                length--;
-                                break;
-                            }
-                        }
-                        offset++;
-                        length--;
-                        if (offset==BUFFERMAX)
-                            offset=0;
-                        c = buffer[offset];
-                    }
-
-                    if (outputEnd>0){
-                        termAtt.copyBuffer(outputBuffer, 0, outputEnd);
-                        log.info(termAtt.toString());
-                        offsetAtt.setOffset(0, outputEnd-1);
-                        positionAtt.setPositionIncrement(1);
-                        return true;
-                    }
+                    break;
+                }
+                if (readAll){
+                    return false;
                 }
             }
-            return false;
-        } catch(Exception ex){
-            log.error("Number internal error ", ex);
-            log.error("Buffer: #"+new String(buffer)+"#");
-            StackTraceElement[] elements = ex.getStackTrace();
-            for (int iterator=elements.length-1; iterator>0; iterator--)
-                   log.error(elements[iterator].getMethodName()+" LN "+elements[iterator].getLineNumber());
-            
+            if (outputEnd>0){
+                termAtt.copyBuffer(outputBuffer, 0, outputEnd);
+                //log.info(termAtt.toString());
+                offsetAtt.setOffset(0, outputEnd-1);
+                positionAtt.setPositionIncrement(1);
+                outputSize = outputEnd;
+                outputEnd=0;
+                nonWs = false;
+                return true;
+            } else {
+                return false;
+            }
         }
-        return false;
     }    
 }

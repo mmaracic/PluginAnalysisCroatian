@@ -138,8 +138,8 @@ public class CroatianAnalysisTest {
     {
         try {
             Tokenizer tokenizer = new BackFrontTokenizer(1,3);
-            tokenizer.setReader(new StringReader("EŠETARISTJEPANA RADIĆAAdžamovciStaro Petrovo SeloREŠETARISTJEPANA RADIĆAAdžamovciStaro Petrovo SeloREŠETARISTJEPANA RADIĆAAdžamovciStaro Petrovo SeloREŠETARIANTE STARČEVIĆAAdžamovciStaro Petrovo SeloREŠETARIANTE STARČEVIĆAAdžamovciStaro Petrovo SeloREŠETARIANTE STARČEVIĆAAdžamovciStaro Petrovo SeloREŠETARISVETOG VALENTINAAdžamovciStaro Petrovo SeloREŠETARISVETOG VALENTINAAdžamovciStaro Petrovo SeloREŠETARISVETOG VALENTINAAdžamovciStaro Petrovo SeloREŠETARISVETOG VALENTINAAdžamovciStaro Petrovo SeloREŠETARISVETOG VALENTINAAdžamovciStaro Petrovo Selotrovo SeloREŠETARIKRALJA TOMISLAVAAdžamovciStaro Petrovo SeloREŠETARIKRALJA TOMISLAVAAdžamovciStaro Petrovo SeloREŠETARIKRALJA TOMISLAVAAdžamovciStaro Petrovo SeloREŠETARIKRALJA TOMISLAVAAdžamovciStaro Petrovo SeloREŠETARIKRALJA TOMISLAVAAdžamovciStaro Petrovo SeloREŠETARIKRALJA TOMISLAVAAdžamovciStaro Petrovo SeloREŠETARIKRALJA TOMISLAVAAdžamovciStaro Petrovo SeloREŠETARIKRALJA TOMISLAVAAdžamovciStaro Petrovo SeloREŠETARIKRALJA TOMISLAVAAdžamovciStaro Petrovo SeloR"));
-            //tokenizer.setReader(new StringReader("this is 1996 a sentence 2004"));
+            //tokenizer.setReader(new StringReader("Adžamovci"));
+            tokenizer.setReader(new StringReader("this is 1996 a sentence 2004 test"));
             //tokenizer.setReader(new StringReader("Primorsko-goranska županija.. This is a test. It is 1996 a sentence 2004..  In a year 1998 i had 15 years."));
             CharTermAttribute term1 = tokenizer.addAttribute(CharTermAttribute.class);
             TypeAttribute typeAtt = tokenizer.addAttribute(TypeAttribute.class);

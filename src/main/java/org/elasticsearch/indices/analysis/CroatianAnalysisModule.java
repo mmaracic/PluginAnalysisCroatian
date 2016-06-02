@@ -6,8 +6,6 @@
 package org.elasticsearch.indices.analysis;
 
 import org.elasticsearch.common.inject.AbstractModule;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.index.analysis.AnalysisModule;
 
 /**
  *
