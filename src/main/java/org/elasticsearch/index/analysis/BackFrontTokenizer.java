@@ -52,72 +52,82 @@ public class BackFrontTokenizer extends Tokenizer{
     @Override
     public final boolean incrementToken() throws IOException
     {   
-        boolean readAll = false;
-        if (outputEnd>(takeBack+takeFront) && outputCounter < ((takeBack+1)*(takeFront+1))){
-            int tempTakeFront = outputCounter%(takeFront+1);
-            int tempTakeBack = (int) (((float)outputCounter)/(takeFront+1));
-            outputCounter++;
-            
-            termAtt.copyBuffer(outputBuffer, tempTakeBack, outputEnd-tempTakeFront-tempTakeBack);
-            log.info(termAtt.toString());
-            offsetAtt.setOffset(tempTakeBack, outputEnd-tempTakeFront-1);
-            positionAtt.setPositionIncrement(1);
-            return true;
-        } else {
-            while(!readAll)
-            {
-                length = (offset<=textEnd)?textEnd-offset:BUFFERMAX-(offset-textEnd);
-                while(length<BUFFERMAX){
-                    int count = 0;
-                    if (offset<=textEnd){
-                        count = input.read(buffer, textEnd, BUFFERMAX-textEnd);
-                    } else if (offset>textEnd){
-                        count = input.read(buffer, textEnd, offset-textEnd);
-                    }
-                    if (count == -1){
-                        readAll = true;
-                        break;
-                    }
-                    textEnd+=count;
-                    if (textEnd == BUFFERMAX) textEnd = 0;
-                    length = (offset<textEnd)?textEnd-offset:BUFFERMAX-(offset-textEnd);
-                }
+        try{
+            boolean readAll = false;
+            if (outputEnd>(takeBack+takeFront) && outputCounter < ((takeBack+1)*(takeFront+1))){
+                int tempTakeFront = outputCounter%(takeFront+1);
+                int tempTakeBack = (int) (((float)outputCounter)/(takeFront+1));
+                outputCounter++;
 
-                outputEnd=0;
-                outputCounter=1;
-                char c = buffer[offset];
-                boolean digit = false;
-                while(length>0){            
-                    if (Character.isLetter(c))
-                    {
-                        //part of token
-                        outputBuffer[outputEnd] = c;
-                        outputEnd++;
-                        digit = true;
-                    } else {
-                        //outside token
-                        if (digit)
-                        {
-                            offset++;
-                            length--;
+                termAtt.copyBuffer(outputBuffer, tempTakeBack, outputEnd-tempTakeFront-tempTakeBack);
+                log.info(termAtt.toString());
+                offsetAtt.setOffset(tempTakeBack, outputEnd-tempTakeFront-1);
+                positionAtt.setPositionIncrement(1);
+                return true;
+            } else {
+                while(!readAll)
+                {
+                    length = (offset<=textEnd)?textEnd-offset:BUFFERMAX-(offset-textEnd);
+                    while(length<BUFFERMAX){
+                        int count = 0;
+                        if (offset<=textEnd){
+                            count = input.read(buffer, textEnd, BUFFERMAX-textEnd);
+                        } else if (offset>textEnd){
+                            count = input.read(buffer, textEnd, offset-textEnd);
+                        }
+                        if (count == -1){
+                            readAll = true;
                             break;
                         }
+                        textEnd+=count;
+                        if (textEnd == BUFFERMAX) textEnd = 0;
+                        length = (offset<textEnd)?textEnd-offset:BUFFERMAX-(offset-textEnd);
                     }
-                    offset++;
-                    length--;
-                    if (offset==BUFFERMAX)
-                        offset=0;
-                    c = buffer[offset];
-                }
 
-                if (outputEnd>0){
-                    termAtt.copyBuffer(outputBuffer, 0, outputEnd);
-                    log.info(termAtt.toString());
-                    offsetAtt.setOffset(0, outputEnd-1);
-                    positionAtt.setPositionIncrement(1);
-                    return true;
+                    outputEnd=0;
+                    outputCounter=1;
+                    char c = buffer[offset];
+                    boolean digit = false;
+                    while(length>0){            
+                        if (Character.isLetter(c))
+                        {
+                            //part of token
+                            outputBuffer[outputEnd] = c;
+                            outputEnd++;
+                            digit = true;
+                        } else {
+                            //outside token
+                            if (digit)
+                            {
+                                offset++;
+                                length--;
+                                break;
+                            }
+                        }
+                        offset++;
+                        length--;
+                        if (offset==BUFFERMAX)
+                            offset=0;
+                        c = buffer[offset];
+                    }
+
+                    if (outputEnd>0){
+                        termAtt.copyBuffer(outputBuffer, 0, outputEnd);
+                        log.info(termAtt.toString());
+                        offsetAtt.setOffset(0, outputEnd-1);
+                        positionAtt.setPositionIncrement(1);
+                        return true;
+                    }
                 }
             }
+            return false;
+        } catch(Exception ex){
+            log.error("Number internal error ", ex);
+            log.error("Buffer: #"+new String(buffer)+"#");
+            StackTraceElement[] elements = ex.getStackTrace();
+            for (int iterator=elements.length-1; iterator>0; iterator--)
+                   log.error(elements[iterator].getMethodName()+" LN "+elements[iterator].getLineNumber());
+            
         }
         return false;
     }    
